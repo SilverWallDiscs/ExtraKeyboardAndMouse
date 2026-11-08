@@ -1,0 +1,7 @@
+/target
+/dist
+*.pdb
+*.ilk
+*.obj
+*.exe
+.env

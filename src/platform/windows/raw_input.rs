@@ -248,12 +248,16 @@ unsafe fn read_raw_input(handle: HRAWINPUT) -> Option<RAWINPUT> {
         header_size,
     );
 
-    if query_result == u32::MAX || byte_count < size_of::<RAWINPUT>() as u32 {
+    if query_result == u32::MAX || byte_count < header_size {
         return None;
     }
 
+    // A keyboard RAWINPUT can be smaller than the maximum-sized RAWINPUT
+    // struct because the data union is smaller. Allocate enough for the full
+    // Rust struct while still allowing GetRawInputData to report its true size.
+    let allocation_size = (byte_count as usize).max(size_of::<RAWINPUT>());
     // u64 storage guarantees at least the alignment required by RAWINPUT.
-    let word_count = (byte_count as usize + size_of::<u64>() - 1) / size_of::<u64>();
+    let word_count = (allocation_size + size_of::<u64>() - 1) / size_of::<u64>();
     let mut storage = vec![0u64; word_count];
 
     let read_result = GetRawInputData(
@@ -408,11 +412,6 @@ unsafe fn get_device_name(device: HANDLE) -> Result<String> {
     }
 
     let usable_length = (read_result as usize).min(buffer.len());
-    while buffer.get(usable_length.saturating_sub(1)) == Some(&0) {
-        // The length is already bounded by the returned character count.
-        break;
-    }
-
     let name = String::from_utf16_lossy(&buffer[..usable_length]);
     Ok(name.trim_end_matches('\0').to_owned())
 }

@@ -222,11 +222,15 @@ unsafe fn handle_raw_input(handle: HRAWINPUT) {
         }
         RIM_TYPEMOUSE => {
             let mouse = input.data.mouse;
+            let button_flags = mouse.Anonymous.Anonymous.usButtonFlags;
+            let button_data = mouse.Anonymous.Anonymous.usButtonData as i16;
             debug!(
                 device = %device_name,
                 delta_x = mouse.lLastX,
                 delta_y = mouse.lLastY,
-                flags = mouse.usFlags,
+                movement_flags = mouse.usFlags,
+                button_flags,
+                button_data,
                 "Mouse event"
             );
         }

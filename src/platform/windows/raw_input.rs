@@ -8,9 +8,8 @@ use windows_sys::Win32::Foundation::{GetLastError, HANDLE, HWND, LPARAM, LRESULT
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::UI::Input::{
     GetRawInputData, GetRawInputDeviceInfoW, GetRawInputDeviceList, RegisterRawInputDevices,
-    HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTDEVICELIST, RAWINPUTHEADER, RID_INPUT,
-    RIDEV_DEVNOTIFY, RIDEV_INPUTSINK, RIDI_DEVICENAME, RIM_TYPEHID, RIM_TYPEKEYBOARD,
-    RIM_TYPEMOUSE,
+    HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTDEVICELIST, RAWINPUTHEADER, RIDEV_DEVNOTIFY,
+    RIDEV_INPUTSINK, RIDI_DEVICENAME, RID_INPUT, RIM_TYPEHID, RIM_TYPEKEYBOARD, RIM_TYPEMOUSE,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, RegisterClassW,
@@ -162,7 +161,10 @@ unsafe fn register_raw_input(window: HWND) -> Result<()> {
     );
 
     if succeeded == 0 {
-        return Err(anyhow!("RegisterRawInputDevices failed: {}", GetLastError()));
+        return Err(anyhow!(
+            "RegisterRawInputDevices failed: {}",
+            GetLastError()
+        ));
     }
 
     Ok(())
@@ -244,13 +246,7 @@ unsafe fn read_raw_input(handle: HRAWINPUT) -> Option<RAWINPUT> {
     let mut byte_count = 0u32;
     let header_size = size_of::<RAWINPUTHEADER>() as u32;
 
-    let query_result = GetRawInputData(
-        handle,
-        RID_INPUT,
-        null_mut(),
-        &mut byte_count,
-        header_size,
-    );
+    let query_result = GetRawInputData(handle, RID_INPUT, null_mut(), &mut byte_count, header_size);
 
     if query_result == u32::MAX || byte_count < header_size {
         return None;
@@ -327,11 +323,7 @@ unsafe fn refresh_device_catalog() {
                 *current = next;
             }
 
-            info!(
-                mice,
-                keyboards,
-                "Current physical input device count"
-            );
+            info!(mice, keyboards, "Current physical input device count");
             if mice <= 1 && keyboards <= 1 {
                 info!("Single-device mode: Windows input path remains unchanged.");
             } else {
@@ -386,12 +378,8 @@ unsafe fn enumerate_devices() -> Result<Vec<(usize, u32, String)>> {
 
 unsafe fn get_device_name(device: HANDLE) -> Result<String> {
     let mut character_count = 0u32;
-    let size_result = GetRawInputDeviceInfoW(
-        device,
-        RIDI_DEVICENAME,
-        null_mut(),
-        &mut character_count,
-    );
+    let size_result =
+        GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, null_mut(), &mut character_count);
 
     if size_result != 0 || character_count == 0 {
         return Err(anyhow!(
@@ -429,8 +417,8 @@ unsafe fn describe_device(device: HANDLE) -> DeviceDescriptor {
         }
     }
 
-    let name = get_device_name(device)
-        .unwrap_or_else(|_| format!("Unknown Raw Input device 0x{key:X}"));
+    let name =
+        get_device_name(device).unwrap_or_else(|_| format!("Unknown Raw Input device 0x{key:X}"));
     let descriptor = DeviceDescriptor {
         kind: DeviceKind::Unknown,
         name: Arc::<str>::from(name),

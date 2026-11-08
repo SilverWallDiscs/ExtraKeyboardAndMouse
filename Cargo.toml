@@ -1,0 +1,27 @@
+[package]
+name = "extra-keyboard-and-mouse"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Input-only local and remote multiplayer input bridge for Windows"
+license = "MIT"
+repository = "https://github.com/SilverWallDiscs/ExtraKeyboardAndMouse"
+
+[dependencies]
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

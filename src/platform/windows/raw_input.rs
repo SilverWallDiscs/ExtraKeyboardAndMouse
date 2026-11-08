@@ -305,7 +305,7 @@ unsafe fn refresh_device_catalog() {
                         info!(
                             kind = descriptor.kind.label(),
                             device = %descriptor.name,
-                            "Input device detected"
+                            "Raw Input endpoint detected"
                         );
                     }
                 }
@@ -315,7 +315,7 @@ unsafe fn refresh_device_catalog() {
                         info!(
                             kind = descriptor.kind.label(),
                             device = %descriptor.name,
-                            "Input device removed"
+                            "Raw Input endpoint removed"
                         );
                     }
                 }
@@ -323,11 +323,11 @@ unsafe fn refresh_device_catalog() {
                 *current = next;
             }
 
-            info!(mice, keyboards, "Current physical input device count");
+            info!(mice, keyboards, "Current Raw Input endpoint count");
             if mice <= 1 && keyboards <= 1 {
                 info!("Single-device mode: Windows input path remains unchanged.");
             } else {
-                info!("Multiple input devices detected; per-device capture is available.");
+                info!("Multiple Raw Input endpoints detected; device-specific capture is available.");
             }
         }
         Err(error) => warn!(%error, "Could not enumerate Raw Input devices"),

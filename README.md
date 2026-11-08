@@ -36,7 +36,7 @@ $env:RUST_LOG = "debug"
 cargo run
 ```
 
-The app prints the current number of Raw Input keyboards and mice. Connect a second keyboard or mouse and watch for the hot-plug log. Press keys or move each mouse; the debug output includes the source device path so you can check whether Windows reports each device separately.
+The app prints the current number of Raw Input keyboards and mice. Connect a second keyboard or mouse and watch for the hot-plug log. Press keys or move each mouse; the debug output includes the source device path, key transitions, mouse movement, button flags, and wheel data so you can check whether Windows reports each device separately.
 
 Stop the monitor with Ctrl+C in its console.
 

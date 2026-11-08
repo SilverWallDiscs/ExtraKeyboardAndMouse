@@ -2,6 +2,9 @@ use anyhow::Result;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
+#[cfg(target_os = "windows")]
+mod platform;
+
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
@@ -9,22 +12,17 @@ fn main() -> Result<()> {
         )
         .init();
 
-    info!("ExtraKeyboardAndMouse starting");
-    info!("This is an early project scaffold; input capture is not enabled yet.");
+    info!("ExtraKeyboardAndMouse v0.1.0");
+    info!("Passive physical-device input monitor");
+    info!("Normal Windows input is not blocked or changed.");
 
-    run_platform_notice();
+    #[cfg(target_os = "windows")]
+    platform::windows::run()?;
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        anyhow::bail!("ExtraKeyboardAndMouse currently supports Windows only.");
+    }
 
     Ok(())
-}
-
-#[cfg(target_os = "windows")]
-fn run_platform_notice() {
-    info!("Platform: Windows");
-    info!("Next milestone: enumerate physical keyboards and mice with Windows Raw Input.");
-}
-
-#[cfg(not(target_os = "windows"))]
-fn run_platform_notice() {
-    info!("Platform: unsupported");
-    info!("The first implementation targets Windows only.");
 }

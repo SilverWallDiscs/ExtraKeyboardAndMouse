@@ -66,7 +66,7 @@ fn catalog() -> &'static Mutex<HashMap<usize, DeviceDescriptor>> {
     DEVICE_CATALOG.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-pub(super) fn run() -> Result<()> {
+pub fn run() -> Result<()> {
     unsafe {
         let instance = GetModuleHandleW(null());
         if instance.is_null() {
